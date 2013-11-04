@@ -113,8 +113,9 @@ int main (int argc, char **argv){
   keypress* keyStruct = malloc(sizeof(keypress));
   password* mainStruct = malloc(sizeof(keypress));
 	password* tempStruct = malloc(sizeof(keypress));
-	int fd, rd, i, k;
+	int fd, rd, i;
 	int j = 0;
+	int k = 0;
 	int count = 0;
 	int tracker = 0;
 	password passArray [10];
@@ -160,7 +161,7 @@ int main (int argc, char **argv){
 
 	//read in data
         
-    while (count < 10 && tracker < 1) {
+    while (count < 10 || tracker < 1) {
 		rd = read(fd, ev, sizeof(struct input_event) * 64);
 
 		if (rd < (int) sizeof(struct input_event)) {
@@ -169,12 +170,7 @@ int main (int argc, char **argv){
 			return 1;
 		}
 
-		      /*if() {
-			printf("%s", "BREAKIN");
-			j = 0;
-			continue;
-			}
-*/
+
       for (i = 0; i < rd / sizeof(struct input_event); i++)
 		    if(ev[i].type == EV_SYN) {
 			//do nothing
@@ -194,9 +190,8 @@ int main (int argc, char **argv){
 			    keyStruct->keycode = keycode;
 			    keyStruct->isUp = state;
 			
-			    if(keycode == 28 && state == 1 && count == 10) {
-			    //pass in here
-			    printf("\n Hello there");
+			    if(keycode == 28 && state == 1 && count > 9) {
+			    //pass in here(new password inside 'keyStruct')
 			    tracker = 1;
 			    }
 			    else if(keycode == 28 && state == 1) {
@@ -206,9 +201,9 @@ int main (int argc, char **argv){
           }
 			    passArray[count] = *tempStruct;
 			    count++;
-		    	j = 0;
+		    	    j = 0;
       }
-			if(keycode !=28 && count == 10) {
+			if(keycode !=28 && count > 9) {
 			  mainStruct->passList[k] = *keyStruct;
 			  mainStruct->size = k+1;
 			  k++;
@@ -218,6 +213,9 @@ int main (int argc, char **argv){
 			  tempStruct->passList[j] = *keyStruct;
 			  tempStruct->size = j+1;
 			  j++;
+			}
+			if(keycode == 28 && state == 0 && count == 10) {
+			  continue;
 			}
 		}
 			
