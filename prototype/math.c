@@ -13,7 +13,12 @@ struct{
   keypress passList [100];
 }typedef password;
 
-void makeStats(password* list [10]){
+struct{
+  double* averages;
+  double* deviation;
+}typedef stats;
+
+stats makeStats(password* list [10]){
   int size = list[0]->size;
   double averages [size-1];
   double deviation [size-1];
@@ -40,32 +45,29 @@ void makeStats(password* list [10]){
     var /= 10;
     deviation[x] = sqrt(var);
   }
+  stats returnMe;
+  returnMe.averages = averages;
+  returnMe.deviation = deviation;
+  return returnMe;
+  
 }
 
-int power(int i){
-  for(int a = 0; a < i; a++){
-    
+int sequence(password* old, password* check){
+  if(old->size != check->size)
+    return 0;
+  for(int i = 0; i < old->size; i++){
+    if((old->passList[i].keycode != check->passList[i].keycode)
+      && (old->passList[i].isUp != old->passList[i].isUp))
+      return 0;
   }
+  return 1;
 }
 
-long double parseDouble(char str []){
-  int i = 0;
-  int right = -1;
-  long double full = 0;
-  for(i = 0; i < sizeof(str); i++){
-    if(str[i] == '.'){
-      right++;
-    }else if(right != -1){
-      right++;
-      full += (pow(10,sizeof(str)+1-i))*(str[i]-48);
-    }else{
-      full += (pow(10,sizeof(str)-i))*(str[i]-48);
-    }
-    printf("\n%f, %c\n", full, str[i]);
-  }
-  full *= pow(10, right);
-  return full;
+int acceptable(stats* data, password* toCheck){
+  
+  return 0;
 }
+
 
 int main(){
   char *stringEnd;
