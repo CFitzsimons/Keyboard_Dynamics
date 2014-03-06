@@ -8,7 +8,7 @@
  *
  *  Modified by Colin Fitzsimons and Dylan Lee
  *  
- *  Requests password entry and trains a graph.  
+ *  Requests password entry and trains a distrubution.  
  */
 
 #include <stdint.h>
@@ -27,25 +27,38 @@
 #endif
  
 
-
+//Structure to hold data related to a single key event
 struct{
    double time;
    int keycode;
-   //1 for yes, 0 for no
    int isUp;
 }typedef keypress;
 
+//Structure to hold a password using an unfilled array.
 struct{
   int size;
   keypress passList [100];
 }typedef password;
 
+//Structure to hold statistics related to a given array.  
 struct{
   int size;
   double averages [100];
   double deviation [100];
 }typedef stats;
 
+/*
+* Name: 
+*   makeStats
+* Function:
+*   Create usefull statistics from a passed in array of password data.
+* Preconditions: 
+*   Pointer to where the stats should be stored and an array of
+*   passwords to create stats from.
+* Postconditions:
+*   store variable should be updated with stasitical data - 
+*   nothing else will change
+*/
 stats* makeStats(password list [10], stats* store){
   store->size = 0;
   int size = list[0].size;
@@ -78,12 +91,21 @@ stats* makeStats(password list [10], stats* store){
     var /= 10;
     store->deviation[x] = sqrt(var);
   }
-  //for(int i = 0; i < sizeof(store->averages); i++){
-  //  printf("%f\n", store->averages[i]);
-  //}
   return store;
 }
 
+/*
+* Name: 
+*   acceptable
+* Function:
+*   Compares a password against a stats structure to detminine if it's
+*   within the allowed deviation.  
+* Preconditions: 
+*   Pointers to both the stats record and the password to check.  
+* Postconditions:
+*   A 1 is returned if the password is within the acceptable limit
+*   a 0 is returned otherwise. 
+*/
 int acceptable(stats* record, password* check){
   int count = 0;
   for(int i = 0; i < check->size-1; i++){
@@ -99,6 +121,17 @@ int acceptable(stats* record, password* check){
   return count;
 }
 
+/*
+* Name: 
+*   sequence
+* Function:
+*   Compares the sequence of keypresses against the known sequences.
+* Preconditions: 
+*   The old password to check against and the new password.
+* Postconditions:
+*   No data will change internally.  The return will be a 1 or a 0
+*   indicating whether or not the sequence matches.  
+*/
 int sequence(password* old, password* check){
   if(old->size != check->size)
     return 0;
@@ -109,6 +142,8 @@ int sequence(password* old, password* check){
   }
   return 1;
 }
+
+//Some origional definitoins
 #define BITS_PER_LONG (sizeof(long) * 8)
 #define NBITS(x) ((((x)-1)/BITS_PER_LONG)+1)
 #define OFF(x)  ((x)%BITS_PER_LONG)
@@ -132,43 +167,24 @@ int main (int argc, char **argv){
 	unsigned long bit[EV_MAX][NBITS(KEY_MAX)];
 	char name[256] = "Unknown";
 	int abs[5];
-
+	
+  //Make sure there are enough arguments.
 	if (argc < 2) {
 		printf("Usage: evtest /dev/input/eventX\n");
 		printf("Where X = input device number\n");
 		return 1;
 	}
-
+	//Magic.
 	if ((fd = open(argv[argc - 1], O_RDONLY)) < 0) {
 		perror("evtest");
 		return 1;
 	}
 
-	if (ioctl(fd, EVIOCGVERSION, &version)) {
-		perror("evtest: can't get version");
-		return 1;
-	}
-
-	/*printf("Input driver version is %d.%d.%d\n",
-		version >> 16, (version >> 8) & 0xff, version & 0xff);
-*/
-
-	ioctl(fd, EVIOCGID, id);
-	/*printf("Input device ID: bus 0x%x vendor 0x%x product 0x%x version 0x%x\n",
-		id[ID_BUS], id[ID_VENDOR], id[ID_PRODUCT], id[ID_VERSION]);
-*/
-	ioctl(fd, EVIOCGNAME(sizeof(name)), name);
-	//printf("Input device name: \"%s\"\n", name);
-
-	memset(bit, 0, sizeof(bit));
-	ioctl(fd, EVIOCGBIT(0, EV_MAX), bit[0]);
-	//printf("Supported events:\n");
-
 	printf("Please enter your password\n");
 
 	//read in data
         
-    while (count < 10 || tracker < 1) {
+  while (count < 10 || tracker < 1) {
 		rd = read(fd, ev, sizeof(struct input_event) * 64);
 
 		if (rd < (int) sizeof(struct input_event)) {
@@ -178,57 +194,51 @@ int main (int argc, char **argv){
 		}
 
 
-      for (i = 0; i < rd / sizeof(struct input_event); i++)
-		    if(ev[i].type == EV_SYN) {
-			//do nothing
-		    } else if (ev[i].type == EV_MSC && (ev[i].code == MSC_RAW || ev[i].code == MSC_SCAN)) {		//do nothing
-			  } else {
-			    //save time as double, keycode as int and state as int
-			    char timeStr [20];
- 			    sprintf(timeStr, "%ld.%06ld", ev[i].time.tv_sec, ev[i].time.tv_usec);
-			    char *ptr = NULL;
-			    double timeDouble = strtod(timeStr, &ptr);
-			    int keycode = ev[i].code;
-			    int state = ev[i].value;
+    for (i = 0; i < rd / sizeof(struct input_event); i++)
+      if(ev[i].type == EV_SYN) {
+        //do nothing
+      } else if (ev[i].type == EV_MSC && (ev[i].code == MSC_RAW 
+        || ev[i].code == MSC_SCAN)) {		//do nothing
+      } else {
+		   //save time as double, keycode as int and state as int
+        char timeStr [20];
+        sprintf(timeStr, "%ld.%06ld", ev[i].time.tv_sec, ev[i].time.tv_usec);
+        char *ptr = NULL;
+        double timeDouble = strtod(timeStr, &ptr);
+	  		int keycode = ev[i].code;
+		    int state = ev[i].value;
 
-			    //printf("Double value, keycode and state = %lf %d %d \n", timeDouble, keycode, state);
+		    //printf("Double value, keycode and state = %lf %d %d \n", 
+		    //timeDouble, keycode, state);
 			
-			    keyStruct->time = timeDouble;
-			    keyStruct->keycode = keycode;
-			    keyStruct->isUp = state;
+		    keyStruct->time = timeDouble;
+        keyStruct->keycode = keycode;
+		    keyStruct->isUp = state;
 			
-			    if(keycode == 28 && state == 1 && count > 9) {
+		    if(keycode == 28 && state == 1 && count > 9) {
 			    //pass in here(new password inside 'keyStruct')
 			    tracker = 1;
-			    }
-			    else if(keycode == 28 && state == 1) {
+        }else if(keycode == 28 && state == 1) {
 			    int k;
-			    //for(k = 0; k < j; k++) {
-			    //  printf("\ntempStruct time, type, keycode vals = %f %d %d " , (tempStruct->passList[k]).time , (tempStruct->passList[k]).isUp , (tempStruct->passList[k]).keycode);
-          //}
 			    passArray[count] = *tempStruct;
 			    count++;
 		    	j = 0;
-      }
-			if(keycode !=28 && count > 9) {
-			  mainStruct->passList[k] = *keyStruct;
-			  mainStruct->size = k+1;
-			  k++;
-			}
-			//save inside temp struct
-			else if(keycode !=28) {
-			  tempStruct->passList[j] = *keyStruct;
-			  tempStruct->size = j+1;
-			  j++;
-			}
-			if(keycode == 28 && state == 0 && count == 10) {
-			  continue;
-			}
+        }
+			  if(keycode !=28 && count > 9) {
+          mainStruct->passList[k] = *keyStruct;
+          mainStruct->size = k+1;
+          k++;
+  			}else if(keycode !=28) {
+			    tempStruct->passList[j] = *keyStruct;
+			    tempStruct->size = j+1;
+			    j++;
+        }
+        if(keycode == 28 && state == 0 && count == 10) {
+       	  continue;
+		    }
 		}
-			
   } //end of while
-  //All data is stored at this point.  
-  //---------Create Stats----------
+  //Make stats out of the stored values.
   stats* tmp = malloc(sizeof(stats));
   makeStats(passArray, tmp);
   //---------Stats Created---------	
@@ -243,12 +253,3 @@ int main (int argc, char **argv){
   printf("Is it acceptable? %d", acceptable(tmp, mainStruct));
   return 0;
 }
-
-
-
-
-  
-
-
-
-
