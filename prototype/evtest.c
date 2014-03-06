@@ -41,17 +41,17 @@ struct{
 }typedef password;
 
 struct{
-  double* averages;
-  double* deviation;
+  int size;
+  double averages [100];
+  double deviation [100];
 }typedef stats;
 
 stats* makeStats(password list [10], stats* store){
-  store = malloc(sizeof(stats));  
+  store->size = 0;
   int size = list[0].size;
   double averages [size-1];
   double deviation [size-1];
-  
-  //Loop for the size of the password.
+  //loop to calcuate the averages
   for(int x = 0; x < size-1; x++){
     double diff = 0;
     //Loop for all the inputs I'm given.
@@ -61,35 +61,42 @@ stats* makeStats(password list [10], stats* store){
     printf("Difference %f -- -- ", diff);
     diff /= 10;
     printf("Difference %f\n", diff);
+    store->averages[x] = diff;
     averages[x] = diff;
   }
+  
+  store->size = size-1;
   
   for(int x = 0; x < size-1; x++){
     double diff = 0;
     double var = 0;
     //Same as previous loops but calcualtes variance & deviation.
     for(int y = 0; y < 10; y++){
-      diff += list[y].passList[x+1].time - list[y].passList[x].time;
+      diff = list[y].passList[x+1].time - list[y].passList[x].time;
       var += (diff - averages[x])*(diff - averages[x]);
     }
     var /= 10;
-    deviation[x] = sqrt(var);
+    store->deviation[x] = sqrt(var);
   }
-  store->averages = averages;
-  store->deviation = deviation;
-  for(int i = 0; i < sizeof(store->averages); i++){
-    printf("%f\n", store->averages[i]);
-  }
+  //for(int i = 0; i < sizeof(store->averages); i++){
+  //  printf("%f\n", store->averages[i]);
+  //}
   return store;
 }
 
 int acceptable(stats* record, password* check){
+  int count = 0;
   for(int i = 0; i < check->size-1; i++){
-    if( (record->averages[i]+record->deviation[i] > check->passList[i+1].time-check->passList[i].time) 
-      || (record->averages[i]-record->deviation[i] < check->passList[i+1].time-check->passList[i].time) )
-      return 0;
+    double devRoof = record->averages[i]+record->deviation[i];
+    double devFloor = record->averages[i]-record->deviation[i];
+    devFloor = devFloor - record->deviation[i] - record->deviation[i];
+    devRoof = devRoof + record->deviation[i] + record->deviation[i];
+    double diff = check->passList[i+1].time - check->passList[i].time;
+    if( (devRoof > diff) && ( diff > devFloor) ){
+      count++;
+    }
   }
-  return 1;
+  return count;
 }
 
 int sequence(password* old, password* check){
@@ -184,7 +191,7 @@ int main (int argc, char **argv){
 			    int keycode = ev[i].code;
 			    int state = ev[i].value;
 
-			    printf("Double value, keycode and state = %lf %d %d \n", timeDouble, keycode, state);
+			    //printf("Double value, keycode and state = %lf %d %d \n", timeDouble, keycode, state);
 			
 			    keyStruct->time = timeDouble;
 			    keyStruct->keycode = keycode;
@@ -196,12 +203,12 @@ int main (int argc, char **argv){
 			    }
 			    else if(keycode == 28 && state == 1) {
 			    int k;
-			    for(k = 0; k < j; k++) {
-			      printf("\ntempStruct time, type, keycode vals = %f %d %d " , (tempStruct->passList[k]).time , (tempStruct->passList[k]).isUp , (tempStruct->passList[k]).keycode);
-          }
+			    //for(k = 0; k < j; k++) {
+			    //  printf("\ntempStruct time, type, keycode vals = %f %d %d " , (tempStruct->passList[k]).time , (tempStruct->passList[k]).isUp , (tempStruct->passList[k]).keycode);
+          //}
 			    passArray[count] = *tempStruct;
 			    count++;
-		    	    j = 0;
+		    	j = 0;
       }
 			if(keycode !=28 && count > 9) {
 			  mainStruct->passList[k] = *keyStruct;
@@ -223,9 +230,17 @@ int main (int argc, char **argv){
   //All data is stored at this point.  
   //---------Create Stats----------
   stats* tmp = malloc(sizeof(stats));
-  tmp = makeStats(passArray, tmp);
+  makeStats(passArray, tmp);
   //---------Stats Created---------	
-  
+  printf("--------Averages---------\n");
+  for(int d = 0; d < tmp->size; d++){
+    printf("%f\n", tmp->averages[d]);
+  }
+  printf("--------Deviation---------\n");
+  for(int d = 0; d < tmp->size; d++){
+    printf("%f\n", tmp->deviation[d]);
+  }
+  printf("Is it acceptable? %d", acceptable(tmp, mainStruct));
   return 0;
 }
 
