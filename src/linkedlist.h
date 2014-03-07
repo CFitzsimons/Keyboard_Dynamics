@@ -14,7 +14,7 @@ struct{
   int size;
 }typedef linkedlist;
 
-int addFirst(linkedlist*, node*);
-int append(linkedlist*, node*);
+int addFirst(linkedlist*, void*);
+int append(linkedlist*, void*);
 
 #endif

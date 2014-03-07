@@ -2,7 +2,10 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-int addFirst(linkedlist* ll, node* add){
+int addFirst(linkedlist* ll, void* ptr){
+  node* add = malloc(sizeof(node));
+  add->ptr = ptr;
+  add->next = NULL;
   if(ll->size == 0){
     ll->head = add;
     ll->tail = add;
@@ -15,9 +18,25 @@ int addFirst(linkedlist* ll, node* add){
   return 1;
 }
 
-int append(linkedlist* ll, node* add){
+int removeFirst(linkedlist* ll){
   if(ll->size == 0)
-    return addFirst(ll, add);
+    return 0;
+  void* freeMe = ll->head;
+  if(ll->size == 1){
+    ll->head = NULL;
+    ll-> tail = NULL;
+  }else
+    ll->head = ll->head->next;
+  free(freeMe);
+  ll->size -= 1;
+  return 1;
+}
+
+int append(linkedlist* ll, void* ptr){
+  if(ll->size == 0)
+    return addFirst(ll, ptr);
+  node* add = malloc(sizeof(node));
+  add->ptr = ptr;
   ll->tail->next = add;
   ll->tail = add;
   ll->size += 1;
@@ -28,7 +47,7 @@ int clear(linkedlist* clear){
   if(clear->size <= 0)
     return 0;
   while(clear->size > 0){
-    node* freeMe = clear->head;
+    void* freeMe = clear->head;
     clear->head = clear->head->next;
     free(freeMe);
     clear->size -= 1;
