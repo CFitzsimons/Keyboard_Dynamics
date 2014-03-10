@@ -64,19 +64,26 @@ stats* makeStats(password list [10], stats* store){
   int size = list[0].size;
   double averages [size-1];
   double deviation [size-1];
+  FILE* fp;
+  fp = fopen("training_file.txt", "w");
   //loop to calcuate the averages
   for(int x = 0; x < size-1; x++){
     double diff = 0;
     //Loop for all the inputs I'm given.
+    fprintf(fp, "1");
     for(int y = 0; y < 10; y++){
-      diff += list[y].passList[x+1].time - list[y].passList[x].time;
+      double tmp = list[y].passList[x+1].time - list[y].passList[x].time;
+      fprintf(fp, " %d:%f", y+1, tmp);
+      diff += tmp;
     }
+    fprintf(fp, " # %d\n", x+1);
     printf("Difference %f -- -- ", diff);
     diff /= 10;
     printf("Difference %f\n", diff);
     store->averages[x] = diff;
     averages[x] = diff;
   }
+  //fclose(fp);
   
   store->size = size-1;
   
@@ -108,16 +115,21 @@ stats* makeStats(password list [10], stats* store){
 */
 int acceptable(stats* record, password* check){
   int count = 0;
+  FILE* lulz;
+  lulz = fopen("testing_data.txt", "w");
+  fprintf(lulz, "1");
   for(int i = 0; i < check->size-1; i++){
     double devRoof = record->averages[i]+record->deviation[i];
     double devFloor = record->averages[i]-record->deviation[i];
     devFloor = devFloor - record->deviation[i] - record->deviation[i];
     devRoof = devRoof + record->deviation[i] + record->deviation[i];
     double diff = check->passList[i+1].time - check->passList[i].time;
+    fprintf(lulz, " %d:%f", i+1, diff);
     if( (devRoof > diff) && ( diff > devFloor) ){
       count++;
     }
   }
+  fprintf(lulz, " # Unique");
   return count;
 }
 
@@ -153,8 +165,8 @@ int sequence(password* old, password* check){
 
 int main (int argc, char **argv){
   keypress* keyStruct = malloc(sizeof(keypress));
-  password* mainStruct = malloc(sizeof(keypress));
-	password* tempStruct = malloc(sizeof(keypress));
+  password* mainStruct = malloc(sizeof(password));
+	password* tempStruct = malloc(sizeof(password));
 	int fd, rd, i;
 	int j = 0;
 	int k = 0;
@@ -219,7 +231,7 @@ int main (int argc, char **argv){
 			    //pass in here(new password inside 'keyStruct')
 			    tracker = 1;
         }else if(keycode == 28 && state == 1) {
-			    int k;
+			    k = 0;
 			    passArray[count] = *tempStruct;
 			    count++;
 		    	j = 0;
@@ -249,6 +261,10 @@ int main (int argc, char **argv){
   printf("--------Deviation---------\n");
   for(int d = 0; d < tmp->size; d++){
     printf("%f\n", tmp->deviation[d]);
+  }
+  printf("--------Final Pass---------\n");
+  for(int d = 0; d < mainStruct->size; d++){
+    printf("%f, %d\n", tempStruct->passList[d].time, tempStruct->passList[d].keycode);
   }
   printf("Is it acceptable? %d", acceptable(tmp, mainStruct));
   return 0;
