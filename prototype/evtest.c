@@ -21,6 +21,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
+#include <time.h>
 
 #ifndef EV_SYN
 #define EV_SYN 0
@@ -45,6 +46,10 @@ struct{
   int size;
   double averages [100];
   double deviation [100];
+  double upperbound[100];
+  double lowerbound[100];
+  double firstquart[100];
+  double thirdquart[100];
 }typedef stats;
 
 /*
@@ -64,24 +69,31 @@ stats* makeStats(password list [10], stats* store){
   int size = list[0].size;
   double averages [size-1];
   double deviation [size-1];
-  FILE* fp;
-  fp = fopen("training_file.txt", "w");
   //loop to calcuate the averages
   for(int x = 0; x < size-1; x++){
     double diff = 0;
     //Loop for all the inputs I'm given.
-    fprintf(fp, "1");
+    //fprintf(fp, "1");
+    double tmp = 0;
     for(int y = 0; y < 10; y++){
-      double tmp = list[y].passList[x+1].time - list[y].passList[x].time;
-      fprintf(fp, " %d:%f", y+1, tmp);
+      tmp = list[y].passList[x+1].time - list[y].passList[x].time;
+      if(y == 0){
+        store->upperbound[x] = tmp;
+        store->lowerbound[x] = tmp;
+      }else if(store->upperbound[x] < tmp){
+        store->upperbound[x] = tmp;
+      }else if(store->lowerbound[x] > tmp){
+        store->lowerbound[x] = tmp;
+      }
       diff += tmp;
     }
-    fprintf(fp, " # %d\n", x+1);
     printf("Difference %f -- -- ", diff);
     diff /= 10;
     printf("Difference %f\n", diff);
     store->averages[x] = diff;
-    averages[x] = diff;
+    store->averages[x] = diff;
+    store->thirdquart[x] = store->upperbound[x] - store->averages[x];
+    store->firstquart[x] = store->lowerbound[x] + store->averages[x];
   }
   //fclose(fp);
   
@@ -121,15 +133,13 @@ int acceptable(stats* record, password* check){
   for(int i = 0; i < check->size-1; i++){
     double devRoof = record->averages[i]+record->deviation[i];
     double devFloor = record->averages[i]-record->deviation[i];
-    devFloor = devFloor - record->deviation[i] - record->deviation[i];
-    devRoof = devRoof + record->deviation[i] + record->deviation[i];
     double diff = check->passList[i+1].time - check->passList[i].time;
     fprintf(lulz, " %d:%f", i+1, diff);
     if( (devRoof > diff) && ( diff > devFloor) ){
       count++;
     }
   }
-  fprintf(lulz, " # Unique");
+  fprintf(lulz, "\n");
   return count;
 }
 
@@ -153,6 +163,34 @@ int sequence(password* old, password* check){
       return 0;
   }
   return 1;
+}
+
+double randfrom(double min, double max) {
+  double range = (max - min); 
+  double div = RAND_MAX / range;
+  return min + (rand() / div);
+}
+
+int getNegatives(stats* ptr, FILE* fp){
+  for(int x = 0; x < 12; x++){
+    double move = 0;
+    if(x == 0 || x % 4 == 0) //Stop divide by zero
+      move = randfrom(ptr->thirdquart[0],ptr->upperbound[0]);
+    else if(x % 4 == 1)
+      move = randfrom(ptr->lowerbound[0], ptr->firstquart[0]);
+    else if(x % 4 == 2)
+      move = ptr->upperbound[0] - ptr->lowerbound[0];
+    else if(x % 4 == 3)
+      move = ptr->lowerbound[0] - ptr->upperbound[0];
+      
+    fprintf(fp, "-1");
+    for(int i = 0; i < ptr->size; i++){
+      double skew = randfrom(ptr->firstquart[i], ptr->thirdquart[i]);
+      
+      fprintf(fp, " %d:%f", i+1, skew + move);
+    }
+    fprintf(fp, "\n");
+  }
 }
 
 //Some origional definitoins
@@ -252,7 +290,17 @@ int main (int argc, char **argv){
   } //end of while
   //Make stats out of the stored values.
   stats* tmp = malloc(sizeof(stats));
+  FILE* fp;
+  fp = fopen("training_file.txt", "w");
+  for(int dd = 0; dd < 10; dd++){
+    fprintf(fp, "1");
+    for(int d = 0; d < passArray[dd].size-1; d++){
+      fprintf(fp, " %d:%f", d+1, passArray[dd].passList[d+1].time - passArray[dd].passList[d].time);
+    }
+    fprintf(fp, "\n");
+  }
   makeStats(passArray, tmp);
+  getNegatives(tmp, fp);
   //---------Stats Created---------	
   printf("--------Averages---------\n");
   for(int d = 0; d < tmp->size; d++){
@@ -261,6 +309,14 @@ int main (int argc, char **argv){
   printf("--------Deviation---------\n");
   for(int d = 0; d < tmp->size; d++){
     printf("%f\n", tmp->deviation[d]);
+  }
+  printf("--------Upperbound---------\n");
+  for(int d = 0; d < tmp->size; d++){
+    printf("%f\n", tmp->upperbound[d]);
+  }
+  printf("--------Lowerbound---------\n");
+  for(int d = 0; d < tmp->size; d++){
+    printf("%f\n", tmp->lowerbound[d]);
   }
   printf("--------Final Pass---------\n");
   for(int d = 0; d < mainStruct->size; d++){
