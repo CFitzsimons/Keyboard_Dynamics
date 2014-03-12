@@ -1,4 +1,4 @@
-//getPassword function
+//getPassword and checkPassword functions
 
 #include <stdint.h>
 #include <linux/input.h>
@@ -12,7 +12,7 @@
 struct{
    double time;
    int keycode;
-   //1 for yes, 0 for no
+   //1 for down, 0 for up
    int isUp;
 }typedef keypress;
 
@@ -30,46 +30,74 @@ struct{
 #ifndef EV_SYN
 #define EV_SYN 0
 #endif
- 
 
-//temp: main() passes its parameters to getPassword to open event path
+//temp: take in password struct and real pw
+//..check the down keypress sequence against given password
+//..return t or f
+int checkPassword(password* checkStruct, int realPass []) {
+  int check = 0;
+  int i = 0;
+  int j = 0;
+  while(i <= sizeof(realPass)) {
+    //temp: eg hello = 4 size +1 * 2 = 10 = hheelllloo
+    if(checkStruct->size != (sizeof(realPass)+1)*2) {
+      return 0;
+    } 
+    if(checkStruct->passList[j].isUp == 1) {
+      if(checkStruct->passList[j].keycode == realPass[i]) {
+        check = 1;
+        i++;
+        j++;
+      }
+      else {
+        return 0;
+      }
+    }
+    else {
+      j++;
+    }
+  }
+  return check;
+}
+
+/*
+* Name: 
+*   getPassword
+* Function:
+*   Acquires the keypresses and associated data from the user's password
+* Preconditions: 
+*   The path to the event used to gather keypresses
+* Postconditions:
+*   A password stucture will be filled with a sequence of keypresses
+*   representing a password and this will be returned
+*/
 password* getPassword(int argc, char** argv) {
   keypress* keyStruct = malloc(sizeof(keypress));
   password* passStruct = malloc(sizeof(password));
-  password* tempStruct = malloc(sizeof(password));
-  //temp: other variable declarations here
   struct input_event eventCap[64];
   int fileDesc, readEvent;
   int addVal = 0;
   int breakVal = 0;
 
-  if(argc < 2) {
-    printf("Incorrect path used\n");
-    return 0;
-  }
+  //temp: test this
   if ((fileDesc = open(*argv, O_RDONLY)) < 0) {
 		perror("Could not open file");
 		return 0;
   }
-
-  printf("\n Please enter your password");
+  //printf("\e[1;1H\e[2J");
+  //printf("Please enter your password: ");
 
   while(breakVal != 1) {
-    printf("\nIn while");
     readEvent = read(fileDesc, eventCap, sizeof(struct input_event) * 64);
     
     for(int i = 0; i < readEvent/sizeof(struct input_event); i++) {
-      printf("\nIn for");
       if(eventCap[i].type == EV_SYN) {
-        printf("\nIn SYN if");
         //do nothing
       } else if(eventCap[i].type == EV_MSC && (eventCap[i].code == MSC_RAW 
                || eventCap[i].code == MSC_SCAN)) {
-        printf("\nIn MSC if");
         //do nothing
       }
       else {
-        printf("\nIn RIGHT if");
         //temp: change size to fit better
         char timeString [20];
         sprintf(timeString, "%ld.%06ld", eventCap[i].time.tv_sec, eventCap[i].time.tv_usec);
@@ -77,7 +105,6 @@ password* getPassword(int argc, char** argv) {
         double timeDouble = strtod(timeString, &ptr);
         int keycode = eventCap[i].code;
         int state = eventCap[i].value;
-        printf("\nState of values = %f %d %d", timeDouble, keycode, state);
 
         keyStruct->time = timeDouble;
         keyStruct->keycode = keycode;
@@ -86,22 +113,15 @@ password* getPassword(int argc, char** argv) {
         if(keycode == 28 && state == 0) {
           continue;
         }
+        //if hit enter, store password
         else if(keycode == 28 && state == 1) {
-          //check. if okay, add to main struct and break. if not, start again
-          //temp: check here
-          //temp: if not okay..
-
-          //addVal = 0;
-          // continue;
-          //temp: else, if okay..
-          passStruct = tempStruct;
           breakVal = 1;
           break;
         }
+        //store each key
         else {
-          printf("\naddVal value %d", addVal);
-          tempStruct->passList[addVal] = *keyStruct;
-          tempStruct->size = addVal+1;
+          passStruct->passList[addVal] = *keyStruct;
+          passStruct->size = addVal+1;
           addVal++;
         }
       }
@@ -111,20 +131,21 @@ password* getPassword(int argc, char** argv) {
   return passStruct;
 }
 
-//test: for compilation
 int main(int argc, char **argv) {
-  printf("in main");
-  printf("\nargc and argv = %d %s", argc, argv[1]);
   password* mainStruct = malloc(sizeof(password));
+  
   mainStruct = getPassword(argc, &argv[1]);
+  //temp: test phrase is 'hello' with checkPassword
+  int realKeys [] = {35, 18, 38, 38, 24};
+
+  int check = checkPassword(mainStruct, realKeys);
+  while(check == 0) {
+    printf("\nWrong password, please try again..\n");
+    mainStruct = getPassword(argc, &argv[1]);
+    check = checkPassword(mainStruct, realKeys);
+  }
+  printf("\nCorrect password\n");
+  //temp: continue onwards(makestats etc)
   return 0;
 }
 
-
-
-
-
-    
-
-
-  
