@@ -96,7 +96,7 @@ password* getPassword(char* eventPath) {
 }
 
 int sequence(password* old, password* check){
-  
+  printf("Sizes %d, %d: \n", old->size, check->size);
   if(old->size != check->size)
     return 0;
   for(int i = 0; i < old->size; i++){
@@ -206,36 +206,44 @@ double randfrom(double min, double max) {
 }
 
 int getNegatives(stats* ptr, FILE* fp){
+  FILE* out;
+  out = fopen("negs.txt", "a");
   for(int x = 0; x < 12; x++){
     double move = 0;
-    if(x == 0 || x % 4 == 0) //Stop divide by zero
+    if(x == 0 || x % 3 == 0) //Stop divide by zero
       move = randfrom(ptr->thirdquart[0],ptr->upperbound[0]);
-    else if(x % 4 == 1)
+    else if(x % 3 == 1)
       move = randfrom(ptr->lowerbound[0], ptr->firstquart[0]);
-    else if(x % 4 == 2)
+    else if(x % 3 == 2)
       move = ptr->upperbound[0] - ptr->lowerbound[0];
-    else if(x % 4 == 3)
-      move = ptr->lowerbound[0] - ptr->upperbound[0];
+    //else if(x % 4 == 3)
+    //  move = ptr->lowerbound[0] - ptr->upperbound[0];
       
     fprintf(fp, "-1");
+    
     for(int i = 0; i < ptr->size; i++){
+      if(i != 0 || i != ptr->size-1)
+        fprintf(out, ",");
       double skew = randfrom(ptr->firstquart[i], ptr->thirdquart[i]);
-      
+      fprintf(out, "%f", skew + move);
       fprintf(fp, " %d:%f", i+1, skew + move);
     }
+    fprintf(out, "\n");
     fprintf(fp, "\n");
   }
+  fclose(out);
 }
 
 int getDataFile(password* check){
   FILE* fp;
-  fp = fopen("data.txt", "w");
+  fp = fopen("data.txt", "a");
   fprintf(fp, "1");
   for(int i = 0; i < check->size-1; i++){
     double diff = check->passList[i+1].time - check->passList[i].time;
     fprintf(fp, " %d:%f", i+1, diff);
   }
   fprintf(fp, "\n");
+  fclose(fp);
   return 1;
 }
 
@@ -275,19 +283,23 @@ int main(){
     makeStats(passList, info);
   }
   FILE* fp;
-  fp = fopen("training.txt", "w");
+  fp = fopen("training.txt", "a");
   getPositives(passList, fp);
-  getNegatives(info, fp);
+  //getNegatives(info, fp);
   fclose(fp);
-  password* user = malloc(sizeof(password));
+  password user;
   while(1){
-    user = getPassword("/dev/input/event4");
-    if(sequence(user, pass) == 1){
-      printf("Correct password\n");
-      getDataFile(user);
-      svmCall(); 
+    user = *getPassword("/dev/input/event4");
+    if(sequence(pass, &user) == 1){
+      printf("\nCorrect password\n");
+      getDataFile(&user);
+      //svmCall(); 
       //writeData(pass, info);
-      exit(1);
+      //exit(1);
+      system("./easy.py training.txt data.txt");
+    }else{
+      printf("\nWrong password, please try again\n");
+      continue;
     }
   }
 }
