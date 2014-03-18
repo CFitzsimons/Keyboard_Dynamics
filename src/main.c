@@ -8,7 +8,9 @@
 #include <fcntl.h>
 #include <signal.h>
 #include <pthread.h>
+#include <string.h>
 
+#define PATH_MAX 104 
 #define BITS_PER_LONG (sizeof(long) * 8)
 #define NBITS(x) ((((x)-1)/BITS_PER_LONG)+1)
 #define OFF(x)  ((x)%BITS_PER_LONG)
@@ -43,7 +45,7 @@ struct{
   double thirdquart[100];
 }typedef stats;
 
-password* getPassword(char* eventPath) {
+password* getPassword(char* realPath) {
   keypress* keyStruct = malloc(sizeof(keypress));
   password* passStruct = malloc(sizeof(password));
   struct input_event eventCap[64];
@@ -52,7 +54,7 @@ password* getPassword(char* eventPath) {
   int breakVal = 0;
 
   //temp: test this
-  if ((fileDesc = open(eventPath, O_RDONLY)) < 0) {
+  if ((fileDesc = open(realPath, O_RDONLY)) < 0) {
 		perror("Could not open file");
 		return 0;
   }
@@ -199,7 +201,7 @@ int getDataFile(password* check){
 }
 
 
-void setUp(password passArray[20]) {
+void setUp(password passArray[20], char * realPath) {
   printf("Please enter the password you wish to use: \n");
   password* retStruct = malloc(sizeof(password));
   password allStructs;
@@ -207,7 +209,7 @@ void setUp(password passArray[20]) {
   char* eventPath = "/dev/input/event4";
   int check = 1;
   int i = 0;
-  retStruct = getPassword(eventPath);
+  retStruct = getPassword(realPath);
   printf("\nPlease enter the password 20 times\n");
   while(i < 20) {
     if(i == 0){
@@ -224,7 +226,7 @@ void setUp(password passArray[20]) {
       system("clear");
       printf("Please enter your password 5 times, paced out\n");
     }
-    allStructs = *getPassword(eventPath);
+    allStructs = *getPassword(realPath);
     check = sequence(retStruct, &allStructs);
     if(check == 1) {
       passArray[i] = allStructs;
@@ -247,12 +249,19 @@ int main(){
   password* pass = malloc(sizeof(password));
   stats* info = malloc(sizeof(stats));
   FILE* plot;
+  FILE* filePipe;
+  char path[PATH_MAX];
+  filePipe = popen("ls -l /dev/input/by-path/platform-i8042-serio-0-event-kbd", "r");  
+  fgets(path, PATH_MAX, filePipe);
+  int eventVal = sizeof(path)-2;
+  char realPath[] = "/dev/input/event";
+  strcat(realPath, &path[eventVal]);
   //plot = fopen("plot.csv", "w");
   password passList [20];
   if(access("data.bin", F_OK ) != -1 ){
     readPass(passList);
   }else{
-    setUp(passList);
+    setUp(passList, realPath);
   }
   *pass = passList[0];
   makeStats(passList, info);
@@ -264,7 +273,7 @@ int main(){
   password user;
   int check = 0;
   while(!sigismember(&waitingmask, SIGINT)){
-    user = *getPassword("/dev/input/event4");
+    user = *getPassword(realPath);
     sigpending(&waitingmask);
     if(sequence(pass, &user) == 1){
       plot = fopen("plot.csv", "w");
