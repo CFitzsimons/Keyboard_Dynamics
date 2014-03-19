@@ -130,7 +130,7 @@ int sequence(password* old, password* check){
   //  if((old->passList[i].keycode != check->passList[i].keycode)
   //    || (old->passList[i].isUp != old->passList[i].isUp))
   //    return 0;
-  }
+  //}
   return 1;
 }
 
@@ -369,8 +369,8 @@ int main(){
   getPositives(passList, fp);
   fclose(fp);
   //Look and request data from the user until SIGINT is fired.
-  printf("Begining analysis, enter in passwords.  When you are done, send an " +
-    "interrupt sigal using CTRL + C\n");
+  printf("Begining analysis, enter in passwords.  ");
+  printf("When you are done, send an interrupt sigal using CTRL + C\n");
   while(!sigismember(&waitingmask, SIGINT)){
     user = *getPassword(realPath);
     //Check if a siganl is pending
@@ -380,7 +380,7 @@ int main(){
       //Open up the CSV file for writing
       plot = fopen("plot.csv", "w");
       printf("\nCorrect password\n");
-      getDataFile(&user);
+      putDataFile(&user);
       writeData(passList);
       //If a model file hasn't been created this run, create one.
       if(check == 0){
