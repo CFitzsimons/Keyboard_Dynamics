@@ -138,7 +138,7 @@ int svmCall(){
   //execl("./easy.py", "training.txt", "data.txt", NULL);
 }
 
-stats* makeStats(password list [10], stats* store){
+stats* makeStats(password list [20], stats* store){
   store->size = 0;
   int size = list[0].size;
   double averages [size-1];
@@ -149,7 +149,7 @@ stats* makeStats(password list [10], stats* store){
     //Loop for all the inputs I'm given.
     //fprintf(fp, "1");
     double tmp = 0;
-    for(int y = 0; y < 10; y++){
+    for(int y = 0; y < 20; y++){
       tmp = list[y].passList[x+1].time - list[y].passList[x].time;
       if(y == 0){
         store->upperbound[x] = tmp;
@@ -162,7 +162,7 @@ stats* makeStats(password list [10], stats* store){
       diff += tmp;
     }
     printf("Difference %f -- -- ", diff);
-    diff /= 10;
+    diff /= 20;
     printf("Difference %f\n", diff);
     store->averages[x] = diff;
     store->averages[x] = diff;
@@ -177,18 +177,18 @@ stats* makeStats(password list [10], stats* store){
     double diff = 0;
     double var = 0;
     //Same as previous loops but calcualtes variance & deviation.
-    for(int y = 0; y < 10; y++){
+    for(int y = 0; y < 20; y++){
       diff = list[y].passList[x+1].time - list[y].passList[x].time;
       var += (diff - averages[x])*(diff - averages[x]);
     }
-    var /= 10;
+    var /= 20;
     store->deviation[x] = sqrt(var);
   }
   return store;
 }
 
-int getPositives(password list [10], FILE* fp){
-  for(int i = 0; i < 10; i++){
+int getPositives(password list [20], FILE* fp){
+  for(int i = 0; i < 20; i++){
     fprintf(fp, "1");
     for(int j = 0; j < list[i].size-1; j++){
       double diff = list[i].passList[j+1].time - list[i].passList[j].time;
@@ -207,7 +207,7 @@ double randfrom(double min, double max) {
 
 int getNegatives(stats* ptr, FILE* fp){
   FILE* out;
-  out = fopen("negs.txt", "a");
+  out = fopen("negs.txt", "w");
   for(int x = 0; x < 12; x++){
     double move = 0;
     if(x == 0 || x % 3 == 0) //Stop divide by zero
@@ -248,7 +248,7 @@ int getDataFile(password* check){
 }
 
 
-void setUp(password passArray[10]) {
+void setUp(password passArray[20]) {
   printf("Please enter the password you wish to use: \n");
   password* retStruct = malloc(sizeof(password));
   password allStructs;
@@ -257,8 +257,21 @@ void setUp(password passArray[10]) {
   int check = 1;
   int i = 0;
   retStruct = getPassword(eventPath);
-  printf("\nPlease enter the password 10 times\n");
-  while(i < 10) {
+  printf("\nPlease enter the password 20 times\n");
+  while(i < 20) {
+    if(i == 0){
+      system("clear");
+      sleep(2);
+      printf("Please enter your password 10 times\n");
+    }else if(i == 10){
+      system("clear");
+      sleep(2);
+      printf("Please enter your password 5 times, as fast as you can\n");
+    }else if(i == 15){
+      system("clear");
+      sleep(2);
+      printf("Please enter your password 5 times, paced out\n");
+    }
     allStructs = *getPassword(eventPath);
     check = sequence(retStruct, &allStructs);
     if(check == 1) {
@@ -266,6 +279,7 @@ void setUp(password passArray[10]) {
       i++;
     }else {
       printf("\nWrong password, please try again\n");
+      
     }
   }
 }
@@ -273,7 +287,9 @@ void setUp(password passArray[10]) {
 int main(){
   password* pass = malloc(sizeof(password));
   stats* info = malloc(sizeof(stats));
-  password passList [10];
+  FILE* plot;
+  //plot = fopen("plot.csv", "w");
+  password passList [20];
   if(access("data.bin", F_OK ) != -1 ){
     readPass(pass);
     readStats(info);
@@ -283,20 +299,37 @@ int main(){
     makeStats(passList, info);
   }
   FILE* fp;
-  fp = fopen("training.txt", "a");
+  fp = fopen("training.txt", "w");
   getPositives(passList, fp);
   //getNegatives(info, fp);
   fclose(fp);
   password user;
+  int check = 0;
   while(1){
     user = *getPassword("/dev/input/event4");
     if(sequence(pass, &user) == 1){
+      plot = fopen("plot.csv", "w");
       printf("\nCorrect password\n");
       getDataFile(&user);
       //svmCall(); 
       //writeData(pass, info);
-      //exit(1);
-      system("./easy.py training.txt data.txt");
+      //system("./easy.py training.txt data.txt");
+      if(check == 0){
+        system("./svm-train -s 2 training.txt model.txt");
+        check = 1;
+      }
+      system("./svm-predict data.txt model.txt answers.txt");
+      for(int i = 0; i < info->size;i++){
+        if(i != info->size){
+          fprintf(plot, "%f,", info->averages[i]);
+          fprintf(plot, "%f\n", user.passList[i+1].time-user.passList[i].time);
+        }else{
+          fprintf(plot, "%f\n", info->averages[i]);
+          fprintf(plot, "%f\n", user.passList[i+1].time-user.passList[i].time);
+        }
+      }
+      fclose(plot);
+      system("R CMD BATCH sample.r");
     }else{
       printf("\nWrong password, please try again\n");
       continue;
