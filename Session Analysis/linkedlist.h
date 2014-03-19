@@ -16,5 +16,6 @@ struct{
 
 int addFirst(linkedlist*, void*);
 int append(linkedlist*, void*);
+int removeFirst(linkedlist*);
 
 #endif

@@ -403,7 +403,7 @@ int main(){
       //Close the write to the CSV file
       fclose(plot);
       //Call R to create two boxplots relative to the current data.  
-      system("R CMD BATCH boxplots.r");
+      system("R CMD BATCH boxplot.r");
     }else{
       printf("\nWrong password, please try again\n");
       continue;
