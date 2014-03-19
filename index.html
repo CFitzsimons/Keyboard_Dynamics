@@ -1,0 +1,102 @@
+<!doctype html>
+<!-- The Time Machine GitHub pages theme was designed and developed by Jon Rohan, on Feb 7, 2012. -->
+<!-- Follow him for fun. http://twitter.com/jonrohan. Tail his code on http://github.com/jonrohan -->
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+
+  <link rel="stylesheet" href="stylesheets/stylesheet.css" media="screen"/>
+  <link rel="stylesheet" href="stylesheets/pygment_trac.css"/>
+  <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+  <script type="text/javascript" src="javascripts/script.js"></script>
+
+  <title>Keyboard dynamics</title>
+  <meta name="description" content="">
+
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+
+</head>
+
+<body>
+
+  <div class="wrapper">
+    <header>
+      <h1 class="title">Keyboard dynamics</h1>
+    </header>
+    <div id="container">
+      <p class="tagline"></p>
+      <div id="main" role="main">
+        <div class="download-bar">
+        <div class="inner">
+          <a href="https://github.com/CFitzsimons/Keyboard_Dynamics/tarball/master" class="download-button tar"><span>Download</span></a>
+          <a href="https://github.com/CFitzsimons/Keyboard_Dynamics/zipball/master" class="download-button zip"><span>Download</span></a>
+          <a href="https://github.com/CFitzsimons/Keyboard_Dynamics" class="code">View Keyboard dynamics on GitHub</a>
+        </div>
+        <span class="blc"></span><span class="trc"></span>
+        </div>
+        <article class="markdown-body">
+          <h1>
+<a name="keyboard-dynamics-for-intrusion-detection" class="anchor" href="#keyboard-dynamics-for-intrusion-detection"><span class="octicon octicon-link"></span></a>Keyboard dynamics for intrusion detection</h1>
+
+<p>The primary goal of this project is to create a system to model a user's keyboard habits which can be used to detect potential intruders.  The program should actively monitor the user‘s keystrokes and create useful statistics which can then be analysed to help detect intrusion. </p>
+
+<p>Initial goals of the project include:
+Create a program which will prompt the user to enter their password into a terminal window n times.
+Use a SystemTap script to monitor system calls and keystrokes which is then outputted to a text file.
+Analyze this output within the program and perform various statistical operations on it to create a user profile.
+Use this statistical information to determine if subsequent attempts to enter the password belong to the original user.</p>
+
+<p>Further goals of the project include:
+Integrate this method of detection into the Linux authentication system.
+Create a GUI to allow the user to quickly set up their profile.
+Encrypt the password data pulled from the SystemTap script to help prevent potential security threats. 
+Create a secure system in which the user can bypass the detection in the case that they cannot replicate their own keystrokes.</p>
+
+<p>The further goals will be planned and implemented once the initial system is in place and satisfactory/stable.  It is expected that most of the extended goals should be reached.  However, it should be noted that these are additions to the system and are not part of the core requirements defined above.  </p>
+
+<h2>
+<a name="programming-languages" class="anchor" href="#programming-languages"><span class="octicon octicon-link"></span></a>Programming Languages</h2>
+
+<p>The keyboard tracking will be done by a scripting language called Systemtap which should create an output file that can be further analysed.  The system will primarily be designed in C/C++.  </p>
+
+<h2>
+<a name="programming-tools" class="anchor" href="#programming-tools"><span class="octicon octicon-link"></span></a>Programming Tools</h2>
+
+<p>g++/gcc for (C/C++ compiling)
+Github (Collaboration, Version Control and Sharing)</p>
+
+<p>Learning challenges</p>
+
+<ul>
+<li> Systemtap scripting language.</li>
+<li> Statistical analysis.</li>
+<li> OS specific C programming</li>
+<li> Version Control and online collaboration</li>
+</ul><h2>
+<a name="hardwaresoftware-platform" class="anchor" href="#hardwaresoftware-platform"><span class="octicon octicon-link"></span></a>Hardware/Software Platform</h2>
+
+<p>The only required platform for this project is the Fedora OS which we are targeting our program at.  </p>
+        </article>
+      </div>
+    </div>
+    <footer>
+      <div class="owner">
+      <p><a href="https://github.com/CFitzsimons" class="avatar"><img src="https://avatars0.githubusercontent.com/u/1842935?s=60" width="48" height="48"/></a> <a href="https://github.com/CFitzsimons">CFitzsimons</a> maintains <a href="https://github.com/CFitzsimons/Keyboard_Dynamics">Keyboard dynamics</a></p>
+
+
+      </div>
+      <div class="creds">
+        <small>This page generated using <a href="http://pages.github.com/">GitHub Pages</a><br/>theme by <a href="https://twitter.com/jonrohan/">Jon Rohan</a></small>
+      </div>
+    </footer>
+  </div>
+  <div class="current-section">
+    <a href="#top">Scroll to top</a>
+    <a href="https://github.com/CFitzsimons/Keyboard_Dynamics/tarball/master" class="tar">tar</a><a href="https://github.com/CFitzsimons/Keyboard_Dynamics/zipball/master" class="zip">zip</a><a href="" class="code">source code</a>
+    <p class="name"></p>
+  </div>
+
+  
+</body>
+</html>
