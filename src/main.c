@@ -6,6 +6,8 @@
 #include <linux/input.h>
 #include <string.h>
 #include <fcntl.h>
+#include <signal.h>
+#include <pthread.h>
 
 #define BITS_PER_LONG (sizeof(long) * 8)
 #define NBITS(x) ((((x)-1)/BITS_PER_LONG)+1)
@@ -116,20 +118,19 @@ void readStats(stats* read){
   fclose(fp);
 }
 
-void readPass(password* read){
+void readPass(password read [20]){
   FILE* fp;
   fp = fopen("data.bin", "rb");
   fflush(fp);
-  fread(read, sizeof(password), 1, fp);
+  fread(read, sizeof(password), 20, fp);
   fclose(fp);
 }
 
-int writeData(password* writePass, stats* writeStats){
+int writeData(password writePass [20]){
   FILE* fp;
   fp = fopen("data.bin", "wb");
   fflush(fp);
-  fwrite(writePass, sizeof(password), 1, fp);
-  fwrite(writeStats, sizeof(stats), 1, fp);
+  fwrite(writePass, sizeof(password), 20, fp);
   fclose(fp);
   return 1;
 }
@@ -261,15 +262,16 @@ void setUp(password passArray[20]) {
   while(i < 20) {
     if(i == 0){
       system("clear");
-      sleep(2);
       printf("Please enter your password 10 times\n");
     }else if(i == 10){
-      system("clear");
+      printf("Data collected...\n");
       sleep(2);
+      system("clear");
       printf("Please enter your password 5 times, as fast as you can\n");
     }else if(i == 15){
-      system("clear");
+      printf("Data collected...\n");
       sleep(2);
+      system("clear");
       printf("Please enter your password 5 times, paced out\n");
     }
     allStructs = *getPassword(eventPath);
@@ -285,19 +287,25 @@ void setUp(password passArray[20]) {
 }
 
 int main(){
+  sigset_t mainmask, waitingmask;
+  sigemptyset(&mainmask);
+  sigemptyset(&waitingmask);
+  sigaddset(&mainmask, SIGINT);
+  //block signal being sent to kill threads
+  pthread_sigmask(SIG_BLOCK, &mainmask, 0);
+  
   password* pass = malloc(sizeof(password));
   stats* info = malloc(sizeof(stats));
   FILE* plot;
   //plot = fopen("plot.csv", "w");
   password passList [20];
   if(access("data.bin", F_OK ) != -1 ){
-    readPass(pass);
-    readStats(info);
+    readPass(passList);
   }else{
     setUp(passList);
-    *pass = passList[0];
-    makeStats(passList, info);
   }
+  *pass = passList[0];
+  makeStats(passList, info);
   FILE* fp;
   fp = fopen("training.txt", "w");
   getPositives(passList, fp);
@@ -305,14 +313,15 @@ int main(){
   fclose(fp);
   password user;
   int check = 0;
-  while(1){
+  while(!sigismember(&waitingmask, SIGINT)){
     user = *getPassword("/dev/input/event4");
+    sigpending(&waitingmask);
     if(sequence(pass, &user) == 1){
       plot = fopen("plot.csv", "w");
       printf("\nCorrect password\n");
       getDataFile(&user);
       //svmCall(); 
-      //writeData(pass, info);
+      writeData(passList);
       //system("./easy.py training.txt data.txt");
       if(check == 0){
         system("./svm-train -s 2 training.txt model.txt");
@@ -335,5 +344,6 @@ int main(){
       continue;
     }
   }
+  printf("Exiting gracefully...\n");
 }
 
