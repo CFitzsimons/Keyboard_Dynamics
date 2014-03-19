@@ -109,15 +109,6 @@ int sequence(password* old, password* check){
   return 1;
 }
 
-void readStats(stats* read){
-  FILE* fp;
-  fp = fopen("data.bin", "rb");
-  fflush(fp);
-  fseek(fp, sizeof(password), SEEK_CUR);
-  fread(read, sizeof(stats), 1, fp);
-  fclose(fp);
-}
-
 void readPass(password read [20]){
   FILE* fp;
   fp = fopen("data.bin", "rb");
@@ -133,10 +124,6 @@ int writeData(password writePass [20]){
   fwrite(writePass, sizeof(password), 20, fp);
   fclose(fp);
   return 1;
-}
-
-int svmCall(){
-  //execl("./easy.py", "training.txt", "data.txt", NULL);
 }
 
 stats* makeStats(password list [20], stats* store){
@@ -162,9 +149,7 @@ stats* makeStats(password list [20], stats* store){
       }
       diff += tmp;
     }
-    printf("Difference %f -- -- ", diff);
     diff /= 20;
-    printf("Difference %f\n", diff);
     store->averages[x] = diff;
     store->averages[x] = diff;
     store->thirdquart[x] = store->upperbound[x] - store->averages[x];
@@ -198,41 +183,6 @@ int getPositives(password list [20], FILE* fp){
     fprintf(fp, "\n");
   }
   return 1;
-}
-
-double randfrom(double min, double max) {
-  double range = (max - min); 
-  double div = RAND_MAX / range;
-  return min + (rand() / div);
-}
-
-int getNegatives(stats* ptr, FILE* fp){
-  FILE* out;
-  out = fopen("negs.txt", "w");
-  for(int x = 0; x < 12; x++){
-    double move = 0;
-    if(x == 0 || x % 3 == 0) //Stop divide by zero
-      move = randfrom(ptr->thirdquart[0],ptr->upperbound[0]);
-    else if(x % 3 == 1)
-      move = randfrom(ptr->lowerbound[0], ptr->firstquart[0]);
-    else if(x % 3 == 2)
-      move = ptr->upperbound[0] - ptr->lowerbound[0];
-    //else if(x % 4 == 3)
-    //  move = ptr->lowerbound[0] - ptr->upperbound[0];
-      
-    fprintf(fp, "-1");
-    
-    for(int i = 0; i < ptr->size; i++){
-      if(i != 0 || i != ptr->size-1)
-        fprintf(out, ",");
-      double skew = randfrom(ptr->firstquart[i], ptr->thirdquart[i]);
-      fprintf(out, "%f", skew + move);
-      fprintf(fp, " %d:%f", i+1, skew + move);
-    }
-    fprintf(out, "\n");
-    fprintf(fp, "\n");
-  }
-  fclose(out);
 }
 
 int getDataFile(password* check){
@@ -320,9 +270,7 @@ int main(){
       plot = fopen("plot.csv", "w");
       printf("\nCorrect password\n");
       getDataFile(&user);
-      //svmCall(); 
       writeData(passList);
-      //system("./easy.py training.txt data.txt");
       if(check == 0){
         system("./svm-train -s 2 training.txt model.txt");
         check = 1;
