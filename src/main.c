@@ -332,6 +332,7 @@ void setUp(password passArray[20], char * realPath) {
 }
 
 int main(){
+  srand(time(NULL));
   //Setup for blocking SIGINT.
   sigset_t mainmask, waitingmask;
   sigemptyset(&mainmask);
@@ -349,6 +350,7 @@ int main(){
   FILE* fp;
   //Detecting which device to listen on.
   char path[PATH_MAX];
+  
   filePipe = popen("ls -l /dev/input/by-path/platform-i8042-serio-0-event-kbd",
      "r");  
   fgets(path, PATH_MAX, filePipe);
@@ -392,13 +394,11 @@ int main(){
       system("./svm-predict data.txt model.txt answers.txt");
       //Write data to the CSV file for use by R
       for(int i = 0; i < info->size;i++){
-        if(i != info->size){
-          fprintf(plot, "%f,", info->averages[i]);
-          fprintf(plot, "%f\n", user.passList[i+1].time-user.passList[i].time);
-        }else{
-          fprintf(plot, "%f\n", info->averages[i]);
-          fprintf(plot, "%f\n", user.passList[i+1].time-user.passList[i].time);
-        }
+        fprintf(plot, "%f,", passList[5].passList[i+1].time-passList[5].passList[i].time);
+        fprintf(plot, "%f,", passList[13].passList[i+1].time-passList[13].passList[i].time);
+        fprintf(plot, "%f,", passList[17].passList[i+1].time-passList[17].passList[i].time);
+        fprintf(plot, "%f\n", user.passList[i+1].time-user.passList[i].time);
+        
       }
       //Close the write to the CSV file
       fclose(plot);
@@ -411,4 +411,5 @@ int main(){
   }
   printf("Exiting gracefully...\n");
 }
+
 
