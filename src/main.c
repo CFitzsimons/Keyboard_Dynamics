@@ -64,7 +64,6 @@ password* getPassword(char* realPath) {
   int addVal = 0;
   int breakVal = 0;
 
-  //temp: test this
   if ((fileDesc = open(realPath, O_RDONLY)) < 0) {
 		perror("Could not open file");
 		return 0;
@@ -81,7 +80,7 @@ password* getPassword(char* realPath) {
         //do nothing
       }
       else {
-        //temp: change size to fit better
+        //converts time string into a double
         char timeString [20];
         sprintf(timeString, "%ld.%06ld", eventCap[i].time.tv_sec, 
           eventCap[i].time.tv_usec);
@@ -93,13 +92,15 @@ password* getPassword(char* realPath) {
         keyStruct->time = timeDouble;
         keyStruct->keycode = keycode;
         keyStruct->isUp = state;
-        //ignores the first release of the 'enter' key
+        //ignores the release of the 'enter' key
         if(keycode == 28 && state == 0) {
           continue;
+        //break out if user hits the 'enter' key
         }else if(keycode == 28 && state == 1) {
           breakVal = 1;
           break;
         }else {
+          //otherwise, store keypress
           passStruct->passList[addVal] = *keyStruct;
           passStruct->size = addVal+1;
           addVal++;
