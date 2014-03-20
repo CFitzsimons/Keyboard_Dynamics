@@ -38,7 +38,7 @@ struct{
 struct{
   int size;
   double averages [100];
-  double deviation [100];
+  double deviation[100];
   double upperbound[100];
   double lowerbound[100];
   double firstquart[100];
@@ -187,7 +187,6 @@ stats* makeStats(password list [20], stats* store){
   store->size = 0;
   int size = list[0].size;
   double averages [size-1];
-  double deviation [size-1];
   double diff, tmp;
   //loop to calcuate the averages
   for(int x = 0; x < size-1; x++){
