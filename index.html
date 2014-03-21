@@ -1,42 +1,98 @@
-<!doctype html>
-<!-- The Time Machine GitHub pages theme was designed and developed by Jon Rohan, on Feb 7, 2012. -->
-<!-- Follow him for fun. http://twitter.com/jonrohan. Tail his code on http://github.com/jonrohan -->
+<!DOCTYPE html>
 <html>
-<head>
-  <meta charset="utf-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <head>
+    <meta charset='utf-8'>
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <link href='https://fonts.googleapis.com/css?family=Chivo:900' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen" />
+    <link rel="stylesheet" type="text/css" href="stylesheets/pygment_trac.css" media="screen" />
+    <link rel="stylesheet" type="text/css" href="stylesheets/print.css" media="print" />
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <title>Keyboard dynamics by CFitzsimons</title>
+  </head>
 
-  <link rel="stylesheet" href="stylesheets/stylesheet.css" media="screen"/>
-  <link rel="stylesheet" href="stylesheets/pygment_trac.css"/>
-  <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
-  <script type="text/javascript" src="javascripts/script.js"></script>
-
-  <title>Keyboard dynamics</title>
-  <meta name="description" content="">
-
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-
-</head>
-
-<body>
-
-  <div class="wrapper">
-    <header>
-      <h1 class="title">Keyboard dynamics</h1>
-    </header>
+  <body>
     <div id="container">
-      <p class="tagline"></p>
-      <div id="main" role="main">
-        <div class="download-bar">
-        <div class="inner">
-          <a href="https://github.com/CFitzsimons/Keyboard_Dynamics/tarball/master" class="download-button tar"><span>Download</span></a>
-          <a href="https://github.com/CFitzsimons/Keyboard_Dynamics/zipball/master" class="download-button zip"><span>Download</span></a>
-          <a href="https://github.com/CFitzsimons/Keyboard_Dynamics" class="code">View Keyboard dynamics on GitHub</a>
-        </div>
-        <span class="blc"></span><span class="trc"></span>
-        </div>
-        <article class="markdown-body">
+      <div class="inner">
+
+        <header>
+          <h1>Keyboard dynamics</h1>
+          <h2></h2>
+        </header>
+
+        <section id="downloads" class="clearfix">
+          <a href="https://github.com/CFitzsimons/Keyboard_Dynamics/zipball/master" id="download-zip" class="button"><span>Download .zip</span></a>
+          <a href="https://github.com/CFitzsimons/Keyboard_Dynamics/tarball/master" id="download-tar-gz" class="button"><span>Download .tar.gz</span></a>
+          <a href="https://github.com/CFitzsimons/Keyboard_Dynamics" id="view-on-github" class="button"><span>View on GitHub</span></a>
+        </section>
+
+        <hr>
+
+        <section id="main_content">
           <h1>
+<a name="documentation" class="anchor" href="#documentation"><span class="octicon octicon-link"></span></a>Documentation</h1>
+
+<p>The technical specification can be found on a viewable google doc here:  <a href="http://goo.gl/CWZynB">http://goo.gl/CWZynB</a></p>
+
+<p>The user manual can be found here:  <a href="http://goo.gl/EvPBWc">http://goo.gl/EvPBWc</a></p>
+
+<h1>
+<a name="installation-guide" class="anchor" href="#installation-guide"><span class="octicon octicon-link"></span></a>Installation Guide</h1>
+
+<p>Installation has been tested with the following:</p>
+
+<p>gcc (version 3.0.2)</p>
+
+<p>R   (version 4.8.2)</p>
+
+<p>g++ (version 4.8.2)</p>
+
+<p>Fedora OS (Versions 17 and 20)</p>
+
+<p>In order to ensure all of your repositories are up to date, please run yum update first.</p>
+
+<pre><code>sudo yum update
+</code></pre>
+
+<p>Next, in order to install R, the statistical language we use to graph data enter:</p>
+
+<pre><code>sudo yum install R
+</code></pre>
+
+<p>In order to compile the C program you will need the gcc compile which can be installed as follows:</p>
+
+<pre><code>sudo yum install gcc
+</code></pre>
+
+<p>In order to compile libSVM you will need a C++ compiler, install g++ by entering:</p>
+
+<pre><code>sudo yum install gcc-c++
+</code></pre>
+
+<p>Download the zip or tarball archive from <code>https://cfitzsimons.github.io/Keyboard_Dynamics/</code></p>
+
+<p>Unpack the zip file</p>
+
+<p>Open terminal and navigate to the extracted src folder</p>
+
+<p>To compile type</p>
+
+<pre><code>gcc main.c -o main -lm -lpthread --std=gnu99
+</code></pre>
+
+<p>Then in order to compile libSVM navigate the the libSVM folder inside of src and type:</p>
+
+<pre><code>make
+</code></pre>
+
+<p>In order to run the program navigate to src and type:</p>
+
+<pre><code>sudo ./main
+</code></pre>
+
+<h1>
 <a name="keyboard-dynamics-for-intrusion-detection" class="anchor" href="#keyboard-dynamics-for-intrusion-detection"><span class="octicon octicon-link"></span></a>Keyboard dynamics for intrusion detection</h1>
 
 <p>The primary goal of this project is to create a system to model a user's keyboard habits which can be used to detect potential intruders.  The program should actively monitor the user‘s keystrokes and create useful statistics which can then be analysed to help detect intrusion. </p>
@@ -77,26 +133,15 @@ Github (Collaboration, Version Control and Sharing)</p>
 <a name="hardwaresoftware-platform" class="anchor" href="#hardwaresoftware-platform"><span class="octicon octicon-link"></span></a>Hardware/Software Platform</h2>
 
 <p>The only required platform for this project is the Fedora OS which we are targeting our program at.  </p>
-        </article>
+        </section>
+
+        <footer>
+          Keyboard dynamics is maintained by <a href="https://github.com/CFitzsimons">CFitzsimons</a><br>
+          This page was generated by <a href="http://pages.github.com">GitHub Pages</a>. Tactile theme by <a href="https://twitter.com/jasonlong">Jason Long</a>.
+        </footer>
+
+        
       </div>
     </div>
-    <footer>
-      <div class="owner">
-      <p><a href="https://github.com/CFitzsimons" class="avatar"><img src="https://avatars0.githubusercontent.com/u/1842935?s=60" width="48" height="48"/></a> <a href="https://github.com/CFitzsimons">CFitzsimons</a> maintains <a href="https://github.com/CFitzsimons/Keyboard_Dynamics">Keyboard dynamics</a></p>
-
-
-      </div>
-      <div class="creds">
-        <small>This page generated using <a href="http://pages.github.com/">GitHub Pages</a><br/>theme by <a href="https://twitter.com/jonrohan/">Jon Rohan</a></small>
-      </div>
-    </footer>
-  </div>
-  <div class="current-section">
-    <a href="#top">Scroll to top</a>
-    <a href="https://github.com/CFitzsimons/Keyboard_Dynamics/tarball/master" class="tar">tar</a><a href="https://github.com/CFitzsimons/Keyboard_Dynamics/zipball/master" class="zip">zip</a><a href="" class="code">source code</a>
-    <p class="name"></p>
-  </div>
-
-  
-</body>
+  </body>
 </html>
