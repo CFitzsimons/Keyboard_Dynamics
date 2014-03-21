@@ -387,11 +387,11 @@ int main(){
       //If a model file hasn't been created this run, create one.
       if(check == 0){
         //A call to libSVM to create a one class model.
-        system("./svm-train -s 2 training.txt model.txt");
+        system(".//libSVM/svm-train -s 2 training.txt model.txt");
         check = 1;
       }
       //Call libSVM and pass in the created data and model file
-      system("./svm-predict data.txt model.txt answers.txt");
+      system(".//libSVM/svm-predict data.txt model.txt answers.txt");
       //Write data to the CSV file for use by R
       for(int i = 0; i < info->size;i++){
         fprintf(plot, "%f,", passList[5].passList[i+1].time-passList[5].passList[i].time);
