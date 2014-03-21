@@ -1,3 +1,11 @@
+Documentation
+=============
+
+The technical specification can be found on a viewable google doc here:  http://goo.gl/CWZynB
+
+The user manual can be found here:  http://goo.gl/EvPBWc
+
+
 Installation Guide
 ==================
 
