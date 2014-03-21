@@ -322,6 +322,6 @@ int main (int argc, char **argv){
   for(int d = 0; d < mainStruct->size; d++){
     printf("%f, %d\n", tempStruct->passList[d].time, tempStruct->passList[d].keycode);
   }
-  printf("Is it acceptable? %d", acceptable(tmp, mainStruct));
+  acceptable(tmp, mainStruct);
   return 0;
 }
