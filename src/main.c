@@ -354,9 +354,21 @@ int main(){
   filePipe = popen("ls -l /dev/input/by-path/platform-i8042-serio-0-event-kbd",
      "r");  
   fgets(path, PATH_MAX, filePipe);
-  int eventVal = sizeof(path)-2;
+  char eventNum;
+  int i = 0;
+  //acquires correct event path value
+  while(i < strlen(path)) {
+    if(path[i] == '>') {
+      eventNum = i+10;
+      i++;
+    }
+    else {
+      i++;
+    }
+  }
   char realPath[] = "/dev/input/event";
-  strcat(realPath, &path[eventVal]);
+  strcat(realPath, &path[eventNum]);
+
   //Check if the program has been setup already.
   if(access("data.bin", F_OK ) != -1 ){
     readPass(passList);
