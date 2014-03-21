@@ -45,7 +45,7 @@ Open terminal and navigate to the extracted src folder
 
 To compile type
 
-    gcc main.c -o main -lm -lthread --std=gnu99
+    gcc main.c -o main -lm -lpthread --std=gnu99
 
 Then in order to compile libSVM navigate the the libSVM folder inside of src and type:
 
