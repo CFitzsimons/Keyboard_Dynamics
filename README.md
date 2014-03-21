@@ -1,3 +1,53 @@
+Installation Guide
+==================
+
+Installation has been tested with the following:
+
+gcc (version 3.0.2)
+
+R   (version 4.8.2)
+
+g++ (version 4.8.2)
+
+Fedora OS (Versions 17 and 20)
+
+
+In order to ensure all of your repositories are up to date, please run yum update first.
+
+    sudo yum update
+
+Next, in order to install R, the statistical language we use to graph data enter:
+
+    sudo yum install R
+
+In order to compile the C program you will need the gcc compile which can be installed as follows:
+
+    sudo yum install gcc
+
+In order to compile libSVM you will need a C++ compiler, install g++ by entering:
+
+    sudo yum install gcc-c++
+
+
+Download the zip or tarball archive from `https://cfitzsimons.github.io/Keyboard_Dynamics/`
+
+Unpack the zip file
+
+Open terminal and navigate to the extracted src folder
+
+To compile type
+
+    gcc main.c -o main -lm -lthread --std=gnu99
+
+Then in order to compile libSVM navigate the the libSVM folder inside of src and type:
+
+    make
+
+In order to run the program navigate to src and type:
+
+    sudo ./main
+
+
 Keyboard dynamics for intrusion detection
 =========================================
 The primary goal of this project is to create a system to model a user's keyboard habits which can be used to detect potential intruders.  The program should actively monitor the user‘s keystrokes and create useful statistics which can then be analysed to help detect intrusion. 
